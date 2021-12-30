@@ -13,12 +13,12 @@ import java.sql.Statement;
 
 public class UDMUribOut {
     private static final Logger logger =  LogManager.getLogger();
-    private String textXML = "";
+    public String textXML = "";
 
     public boolean createDataOutTable(int idBase){
         boolean result = false;
 
-        int maxID = DBProperties.getMaxIdTableIsm(idBase);
+        long maxID = DBProperties.getMaxIdTableIsm(idBase);
 
         try(Connection connection = new ConnectionCreator().getPostgresConnection();
             Statement statement = connection.createStatement()) {
@@ -31,7 +31,7 @@ public class UDMUribOut {
                     int idExt = resultSet.getInt("IDEXT_BASE_XTISM");
                     if (idExt == idBase){
                         //в DataOut записываем квитанцию  это внешнее изменение
-                        long idTableIzm = resultSet.getInt("ID_XTISM");
+                        long idTableIzm = resultSet.getLong("ID_XTISM");
                         DBProperties.addRecordDataOut(idBase, idTableIzm, 2 ,0);
                     }
                     else {
@@ -42,16 +42,16 @@ public class UDMUribOut {
                 }
                 else if(operation == 4 || operation == 5){
                     //команда отмены проведения или проведения документа
-                    if (resultSet.getInt("IDEXT_BASE_XTISM") == idBase){
+                    if (resultSet.getLong("IDEXT_BASE_XTISM") == idBase){
                         //в DataOut записываем квитанцию  это внешнее изменение
-                        long idTableIzm = resultSet.getInt("ID_XTISM");
+                        long idTableIzm = resultSet.getLong("ID_XTISM");
                         DBProperties.addRecordDataOut(idBase, idTableIzm, 2 ,0);
                     }
                     else {
                         ResultSet xSetupObmen = DBProperties.getXSetupObmen(idBase);
                         if (checkBaseRecordForObmen(xSetupObmen, resultSet, resultSet.getInt("IDBASE_XTISM"), idBase)){
                             //изменение данных
-                            long idTableIzm = resultSet.getInt("ID_XTISM");
+                            long idTableIzm = resultSet.getLong("ID_XTISM");
                             DBProperties.addRecordDataOut(idBase, idTableIzm, 1 ,0);
                         }
                     }
@@ -61,7 +61,7 @@ public class UDMUribOut {
 
         }
         catch (SQLException ex){
-            logger.error(ex);
+            logger.error("ошибка в методе createDataOutTable", ex);
         }
 
         return result;
@@ -72,11 +72,11 @@ public class UDMUribOut {
 
         try {
             if (resultSet.getString("NAME_TABLE_XTISM").equalsIgnoreCase("SPRICE")) {
-                ResultSet priceResultSet = DBProperties.getPrice(resultSet.getInt("VALUE_FIELD_ID_XTISM"));
+                ResultSet priceResultSet = DBProperties.getPrice(resultSet.getLong("VALUE_FIELD_ID_XTISM"));
                 ResultSet tableTypePriceForObmen = DBProperties.getTableTypePriceForObmen(idBase);
                 priceResultSet.next();
                 while (tableTypePriceForObmen.next()){
-                    if (tableTypePriceForObmen.getInt("IDTPRICE_XTPRICE_FOR_OBMEN") == priceResultSet.getInt("IDTYPE_PRICE")){
+                    if (tableTypePriceForObmen.getLong("IDTPRICE_XTPRICE_FOR_OBMEN") == priceResultSet.getLong("IDTYPE_PRICE")){
                         addDataOut = true;
                         break;
                     }
@@ -85,7 +85,7 @@ public class UDMUribOut {
 
             ResultSet xSetupObmen = DBProperties.getXSetupObmen(idBase);
             xSetupObmen.next();
-            if(xSetupObmen.getInt("OUTZPRICE_XSETUP_OBMEN") != 1){
+            if(xSetupObmen.getLong("OUTZPRICE_XSETUP_OBMEN") != 1){
                 if (resultSet.getString("NAME_TABLE_XTISM").equalsIgnoreCase("SNACENKA")){
                     addDataOut = false;
                 }
@@ -116,7 +116,7 @@ public class UDMUribOut {
 
             if (resultSet.getString("NAME_TABLE_XTISM").equalsIgnoreCase("GALLDOC")){
                 //проверим какие поля изменены, если только PRDOC то запись не выгружаем
-                ResultSet tableIsmFields = DBProperties.getTableIsmFields(resultSet.getInt("ID_XTISM"));
+                ResultSet tableIsmFields = DBProperties.getTableIsmFields(resultSet.getLong("ID_XTISM"));
                 tableIsmFields.next();
                 if(tableIsmFields.getString("FIELD_NAME_XTISM_FIELDS").equalsIgnoreCase("PRDOC")){
                     if(!tableIsmFields.next()){
@@ -127,7 +127,7 @@ public class UDMUribOut {
 
             if (resultSet.getString("NAME_TABLE_XTISM").equalsIgnoreCase("REM_GALLDOC")){
                 //проверим какие поля изменены, если только PRDOC то запись не выгружаем
-                ResultSet tableIsmFields = DBProperties.getTableIsmFields(resultSet.getInt("ID_XTISM"));
+                ResultSet tableIsmFields = DBProperties.getTableIsmFields(resultSet.getLong("ID_XTISM"));
                 tableIsmFields.next();
                 if(tableIsmFields.getString("FIELD_NAME_XTISM_FIELDS").equalsIgnoreCase("PR_REM_GALLDOC")){
                     if(!tableIsmFields.next()){
@@ -138,7 +138,7 @@ public class UDMUribOut {
 
             if (resultSet.getString("NAME_TABLE_XTISM").equalsIgnoreCase("HOT_GALLDOC")){
                 //проверим какие поля изменены, если только PRDOC то запись не выгружаем
-                ResultSet tableIsmFields = DBProperties.getTableIsmFields(resultSet.getInt("ID_XTISM"));
+                ResultSet tableIsmFields = DBProperties.getTableIsmFields(resultSet.getLong("ID_XTISM"));
                 tableIsmFields.next();
                 if(tableIsmFields.getString("FIELD_NAME_XTISM_FIELDS").equalsIgnoreCase("PR_HOT_GALLDOC")){
                     if(!tableIsmFields.next()){
@@ -151,9 +151,9 @@ public class UDMUribOut {
                 return;
             }
 
-            if (DBProperties.getIdElement(idBase, resultSet.getInt("ID_XTISM")) == 0 && addDataOut){
+            if (DBProperties.getIdElement(idBase, resultSet.getLong("ID_XTISM")) == 0 && addDataOut){
 
-                if(!DBProperties.addRecordDataOut(idBase, resultSet.getInt("ID_XTISM"), 1, 0)){
+                if(!DBProperties.addRecordDataOut(idBase, resultSet.getLong("ID_XTISM"), 1, 0)){
                     logger.info("Ошибка при добавлении записи в таблицу XDATAOUT");
                 }
 
@@ -161,7 +161,7 @@ public class UDMUribOut {
 
         }
         catch (SQLException ex){
-            logger.error(ex);
+            logger.error("ошибка в методе addInDataOutTable", ex);
         }
     }
 
@@ -170,17 +170,17 @@ public class UDMUribOut {
         boolean result = false;
 
         try {
-            int xSetupObmenALLDOC_XSETUP_OBMEN = xSetupObmen.getInt("ALLDOC_XSETUP_OBMEN");
+            long xSetupObmenALLDOC_XSETUP_OBMEN = xSetupObmen.getLong("ALLDOC_XSETUP_OBMEN");
             //выгружаем все документы
             if (xSetupObmenALLDOC_XSETUP_OBMEN == 1){
                 result = true;
             }
             else {//фильтрация по указанным базам
                 //справочники выгружаем всегда даже если задана база либо не задана
-                if (resultSet.getInt("TYPE_OBJECT_XTISM") == 1){
+                if (resultSet.getLong("TYPE_OBJECT_XTISM") == 1){
                     result = true;
                 }
-                if (resultSet.getInt("TYPE_OBJECT_XTISM") == 2){
+                if (resultSet.getLong("TYPE_OBJECT_XTISM") == 2){
                     if (idBaseObject == 0){
                         result = false;
                     }
@@ -189,14 +189,14 @@ public class UDMUribOut {
 
             ResultSet tableBaseForObmen = DBProperties.getTableBaseForObmen(idBase);
             while (tableBaseForObmen.next()){
-                if (idBaseObject == tableBaseForObmen.getInt("IDBASE_OBJECT_XBASE_FOR_OBMEN")){
+                if (idBaseObject == tableBaseForObmen.getLong("IDBASE_OBJECT_XBASE_FOR_OBMEN")){
                     result = true;
                     break;
                 }
             }
         }
         catch (SQLException ex){
-            logger.error(ex);
+            logger.error("ошибка в методе checkBaseRecordForObmen", ex);
         }
         return result;
     }
@@ -223,29 +223,29 @@ public class UDMUribOut {
             ResultSet tableDataOut = DBProperties.getTableDataOut(idBase);
             if (tableDataOut.next()){
                 //заполним начальное значение ID_XDATA_OUT
-                DBProperties.setFirstId(idBase, tableDataOut.getInt("ID_XDATA_OUT"));
+                DBProperties.setFirstId(idBase, tableDataOut.getLong("ID_XDATA_OUT"));
             }
         }
         catch (SQLException ex){
-            logger.error(ex);
+            logger.error("ошибка в методе createXMLDoc", ex);
         }
 
         try {
             ResultSet tableDataOut = DBProperties.getTableDataOut(idBase);
             int numberTecRecord = 1;
             while (tableDataOut.next()){
-                if (tableDataOut.getInt("TYPE_XDATA_OUT") == 2){
+                if (tableDataOut.getLong("TYPE_XDATA_OUT") == 2){
                     //выгружаем квитанцию
                     outputKvitan(tableDataOut.getInt("IDEXT_DATAOUT_XTISM"), numberTecRecord, idTecBase, idBase);
                 }
-                if (tableDataOut.getInt("TYPE_XDATA_OUT") == 1){
+                if (tableDataOut.getLong("TYPE_XDATA_OUT") == 1){
                     //выгружаем изменения
                     //изменения записи
-                    if (tableDataOut.getInt("OPERATION_XTISM") < 4){
+                    if (tableDataOut.getLong("OPERATION_XTISM") < 4){
                         outputTableInXMLFile(tableDataOut, numberTecRecord, idTecBase, idBase);
                     }
                     //команда проведения или отмены проведения документа
-                    if (tableDataOut.getInt("OPERATION_XTISM") == 4 || tableDataOut.getInt("OPERATION_XTISM") == 5){
+                    if (tableDataOut.getLong("OPERATION_XTISM") == 4 || tableDataOut.getLong("OPERATION_XTISM") == 5){
                         outputComandDvReg(tableDataOut, idTecBase, numberTecRecord);
                     }
                 }
@@ -253,7 +253,7 @@ public class UDMUribOut {
             }
         }
         catch (SQLException ex){
-            logger.error(ex);
+            logger.error("ошибка в методе createXMLDoc", ex);
         }
         return result;
     }
@@ -272,7 +272,7 @@ public class UDMUribOut {
     private void outputTableInXMLFile(ResultSet tableDataOut, int numberTecRecord, int idTecBase, int idBase) throws SQLException{
         String result = "";
 
-        if (tableDataOut.getInt("OPERATION_XTISM") == 3){   //удаление записи
+        if (tableDataOut.getLong("OPERATION_XTISM") == 3){   //удаление записи
             outputDeleteRecordInXMLFile(tableDataOut, numberTecRecord, idTecBase);
             return;
         }
@@ -287,7 +287,7 @@ public class UDMUribOut {
         result += " idext_data_out=\"" + tableDataOut.getString("ID_XDATA_OUT") + "\">";
         result += "\n";
 
-        ResultSet tableIsmFields = DBProperties.getTableIsmFields(tableDataOut.getInt("IDTISM_XDATA_OUT"));
+        ResultSet tableIsmFields = DBProperties.getTableIsmFields(tableDataOut.getLong("IDTISM_XDATA_OUT"));
 
         while (tableIsmFields.next()){
             String fieldName = tableIsmFields.getString("FIELD_NAME_XTISM_FIELDS");
@@ -305,18 +305,18 @@ public class UDMUribOut {
 
             String tempResult = "";
             tempResult += "<" + fieldName;
-            if (tableIsmFields.getInt("TYPE_XTISM_FIELDS") == 2){ //длинная строка
+            if (tableIsmFields.getLong("TYPE_XTISM_FIELDS") == 2){ //длинная строка
                 tempResult += " t=\"2\"";
                 fieldValue = getTextValueFieldLongString(
                         tableDataOut.getString("NAME_TABLE_XTISM"), tableDataOut.getString("NAME_FIELD_ID_XTISM"),
-                        tableDataOut.getInt("VALUE_FIELD_ID_XTISM"), fieldName);
+                        tableDataOut.getLong("VALUE_FIELD_ID_XTISM"), fieldName);
             }
 
-            else if (tableIsmFields.getInt("TYPE_XTISM_FIELDS") == 3){
+            else if (tableIsmFields.getLong("TYPE_XTISM_FIELDS") == 3){
                 tempResult += " t=\"3\"";
                 fieldValue = getTextValueFieldBlob(
                         tableDataOut.getString("NAME_TABLE_XTISM"), tableDataOut.getString("NAME_FIELD_ID_XTISM"),
-                        tableDataOut.getInt("VALUE_FIELD_ID_XTISM"), fieldName);
+                        tableDataOut.getLong("VALUE_FIELD_ID_XTISM"), fieldName);
             }
 
             else {
@@ -345,7 +345,7 @@ public class UDMUribOut {
             result += "</" + tableDataOut.getString("NAME_TABLE_XTISM") + ">";
         }
         catch (SQLException ex){
-            logger.error(ex);
+            logger.error("ошибка в методе outputDeleteRecordInXMLFile", ex);
         }
 
         createXML(result);
@@ -365,7 +365,7 @@ public class UDMUribOut {
             result += "</" + tableDataOut.getString("NAME_TABLE_XTISM") + ">";
         }
         catch (SQLException ex){
-            logger.error(ex);
+            logger.error("ошибка в методе outputComandDvReg", ex);
         }
         createXML(result);
     }
@@ -397,11 +397,12 @@ public class UDMUribOut {
             return result;
         }
 
-        ResultSet xSetupObmen = DBProperties.getXSetupObmen(idBase);
+
         try {
+            ResultSet xSetupObmen = DBProperties.getXSetupObmen(idBase);
             //проверим надо ли выгружать закупочные цены
             xSetupObmen.next();
-            if (!(xSetupObmen.getInt("OUTZPRICE_XSETUP_OBMEN") == 1)){
+            if (!(xSetupObmen.getLong("OUTZPRICE_XSETUP_OBMEN") == 1)){
                 //фильтрация по закупочным ценам,
                 //не надо выгружать закупочные цены
                 //партии
@@ -466,13 +467,13 @@ public class UDMUribOut {
             }
         }
         catch (SQLException ex){
-            logger.error(ex);
+            logger.error("ошибка в методе checkFieldForOutput", ex);
         }
         result = true;
         return result;
     }
 
-    private String getTextValueFieldLongString(String tableName, String pkName, int pkValue, String fieldName){
+    private String getTextValueFieldLongString(String tableName, String pkName, long pkValue, String fieldName){
         String result = "";
         String query = "select " + fieldName + " from " + tableName + " where " + pkName + " = " + pkValue;
 
@@ -484,12 +485,12 @@ public class UDMUribOut {
             }
         }
         catch (SQLException ex){
-            logger.error(ex);
+            logger.error("ошибка в методе getTextValueFieldLongString", ex);
         }
         return result;
     }
 
-    private String getTextValueFieldBlob(String tableName, String pkName, int pkValue, String fieldName){
+    private String getTextValueFieldBlob(String tableName, String pkName, long pkValue, String fieldName){
         String result = "";
         String query = "select " + fieldName + " from " + tableName + " where " + pkName + " = " + pkValue;;
 
@@ -509,6 +510,6 @@ public class UDMUribOut {
     }
 
     public void createXML(String subtext){
-        String result = textXML + subtext + "\n";
+        textXML = textXML + subtext + "\n";
     }
 }
