@@ -136,7 +136,7 @@ public class XMLProperties {
         valuePKMatcher.find();
         String valuePK = valuePKMatcher.group();
         valuePK = valuePK.substring(10, valuePK.length() - 1);
-        int intValuePK = Integer.parseInt(valuePK);
+        long intValuePK = Long.parseLong(valuePK);
 
         Matcher idBasePKMatcher = idBasePattern.matcher(rowText);
         idBasePKMatcher.find();
@@ -148,7 +148,7 @@ public class XMLProperties {
         idBaseDataOutPKMatcher.find();
         String idBaseDataOutPK = idBaseDataOutPKMatcher.group();
         idBaseDataOutPK = idBaseDataOutPK.substring(16, idBaseDataOutPK.length() - 1);
-        int intIdBaseDataOutPK = Integer.parseInt(idBaseDataOutPK);
+        long intIdBaseDataOutPK = Long.parseLong(idBaseDataOutPK);
 
 
         Map<String, String> domainMap = getDomainList(name.toLowerCase());

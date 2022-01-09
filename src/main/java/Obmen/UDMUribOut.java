@@ -231,6 +231,7 @@ public class UDMUribOut {
         }
 
         try {
+            createXML("<data>");
             ResultSet tableDataOut = DBProperties.getTableDataOut(idBase);
             int numberTecRecord = 1;
             while (tableDataOut.next()){
@@ -255,6 +256,7 @@ public class UDMUribOut {
         catch (SQLException ex){
             logger.error("ошибка в методе createXMLDoc", ex);
         }
+        createXML("</data>");
         return result;
     }
 
@@ -297,7 +299,7 @@ public class UDMUribOut {
                 continue;
             }
 
-            //необходимо учитывать что поле может быть
+            //необходимо учитывать что поле может бытьSaveFileXML
             // ДЛИННАЯ СТРОКА
             // BLOB
             //в этом случае сюда помещаем только имя файла в value_field
@@ -320,11 +322,11 @@ public class UDMUribOut {
             }
 
             else {
-                tempResult += " t=\"3\"";
+                tempResult += " t=\"1\"";
                 fieldValue = tableIsmFields.getString("NEW_VALUE_XTISM_FIELDS");
             }
 
-            tempResult += " v=\"" + fieldValue + "\"> \n";
+            tempResult += " v=\"" + fieldValue + "\"/> \n";
             result += tempResult;
         }
         result += "</" + tableDataOut.getString("NAME_TABLE_XTISM") + ">";

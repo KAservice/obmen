@@ -8,12 +8,12 @@ public class RowEntity {
     private int type;
     private int operationNum;
     private String namePK;
-    private int valuePK;
+    private long valuePK;
     private int idBase;
-    private int idBaseDataOut;
+    private long idBaseDataOut;
     private List<FieldEntity> data;
 
-    public RowEntity(String name, int num, int type, int operationNum, String namePK, int valuePK, int idBase, int idBaseDataOut, List<FieldEntity> data) {
+    public RowEntity(String name, int num, int type, int operationNum, String namePK, long valuePK, int idBase, long idBaseDataOut, List<FieldEntity> data) {
         this.name = name;
         this.num = num;
         this.type = type;
@@ -65,7 +65,7 @@ public class RowEntity {
         this.namePK = namePK;
     }
 
-    public int getValuePK() {
+    public long getValuePK() {
         return valuePK;
     }
 
@@ -81,7 +81,7 @@ public class RowEntity {
         this.idBase = idBase;
     }
 
-    public int getIdBaseDataOut() {
+    public long getIdBaseDataOut() {
         return idBaseDataOut;
     }
 

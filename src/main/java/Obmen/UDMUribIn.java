@@ -74,7 +74,7 @@ public class UDMUribIn {
     public void insertRecord(RowEntity row){
         String tableName = row.getName();
         String namePK = row.getNamePK();
-        int valuePK = row.getValuePK();
+        long valuePK = row.getValuePK();
         String query= "";
 
         String checkQuery = "SELECT * FROM " + tableName + " WHERE " + namePK + " = " + valuePK;
@@ -126,7 +126,7 @@ public class UDMUribIn {
     public void editRecord(RowEntity row){
         String tableName = row.getName();
         String namePK = row.getNamePK();
-        int valuePK = row.getValuePK();
+        long valuePK = row.getValuePK();
         String query= "";
 
         String checkQuery = "SELECT * FROM " + tableName + " WHERE " + namePK + " = " + valuePK;
@@ -176,13 +176,13 @@ public class UDMUribIn {
     public void deleteRecord(RowEntity row){
         String tableName = row.getName();
         String PKName = row.getNamePK();
-        int PKValue = row.getValuePK();
+        long PKValue = row.getValuePK();
 
         String idExtBaseName = "IDEXT_BASE_" + tableName;
         int idExtBaseValue = row.getIdBase();
 
         String idExtDataOutName = "IDEXT_DOUT_" + tableName;
-        int idExtDataOutValue = row.getIdBaseDataOut();
+        long idExtDataOutValue = row.getIdBaseDataOut();
 
         String checkQuery = "SELECT * FROM " + tableName + " WHERE " + PKName + " = '" + PKValue + "'";
         String deleteQuery = "DELETE FROM " + tableName + " WHERE " + PKName + " = '" + PKValue + "'";
@@ -221,7 +221,7 @@ public class UDMUribIn {
     }
 
     private void inputKvitan(RowEntity row){
-        int idExtDataOut = row.getIdBaseDataOut();
+        long idExtDataOut = row.getIdBaseDataOut();
         String query = "select * from XDATA_OUT where ID_XDATA_OUT=" + idExtDataOut;
         String updateQuery = "UPDATE XDATA_OUT set RESULT_XDATA_OUT=1  where ID_XDATA_OUT=" + idExtDataOut;
 
@@ -246,9 +246,9 @@ public class UDMUribIn {
     public void runCommandCancelDvRegDoc(RowEntity row){
         String tableName = row.getName();
         int idExtBaseValue = row.getIdBase();
-        int idExtDataOutValue = row.getIdBaseDataOut();
+        long idExtDataOutValue = row.getIdBaseDataOut();
         String namePK = row.getNamePK();
-        int valuePK = row.getValuePK();
+        long valuePK = row.getValuePK();
         String docType = "";
 
         if(namePK.equalsIgnoreCase("IDDOC")){
@@ -276,7 +276,7 @@ public class UDMUribIn {
         int idExtBaseValue = row.getIdBase();
 
         String idExtDataOutName = "IDEXT_DOUT_" + tableName;
-        int idExtDataOutValue = row.getIdBaseDataOut();
+        long idExtDataOutValue = row.getIdBaseDataOut();
 
         String fields = idExtBaseName + ", " + idExtDataOutName;
         String values = idExtBaseValue + ", " + idExtDataOutValue;
@@ -300,12 +300,12 @@ public class UDMUribIn {
     public String createTextZaprosEdit(RowEntity row){
         String tableName = row.getName();
         String PKName = row.getNamePK();
-        int PKValue = row.getValuePK();
+        long PKValue = row.getValuePK();
         String idExtBaseName = "IDEXT_BASE_" + tableName;
         int idExtBaseValue = row.getIdBase();
 
         String idExtDataOutName = "IDEXT_DOUT_" + tableName;
-        int idExtDataOutValue = row.getIdBaseDataOut();
+        long idExtDataOutValue = row.getIdBaseDataOut();
 
         String fields = idExtBaseName + " = " + idExtBaseValue + ", " + idExtDataOutName + " = " + idExtDataOutValue;
 
@@ -337,7 +337,7 @@ public class UDMUribIn {
     private String getTypeDoc(RowEntity row){
         String result = "";
         String namePK = row.getNamePK();
-        int valuePK = row.getValuePK();
+        long valuePK = row.getValuePK();
         String query = "";
 
         if (namePK.equalsIgnoreCase("IDDOC")){
@@ -362,7 +362,7 @@ public class UDMUribIn {
     private String getTypeDocRemontSystem(RowEntity row){
         String result = "";
         String namePK = row.getNamePK();
-        int valuePK = row.getValuePK();
+        long valuePK = row.getValuePK();
         String query = "";
 
         if (namePK.equalsIgnoreCase("ID_REM_GALLDOC")){
@@ -387,7 +387,7 @@ public class UDMUribIn {
     private String getTypeDocHotelSystem(RowEntity row){
         String result = "";
         String namePK = row.getNamePK();
-        int valuePK = row.getValuePK();
+        long valuePK = row.getValuePK();
         String query = "";
 
         if (namePK.equalsIgnoreCase("ID_HOT_GALLDOC")){
