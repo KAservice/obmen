@@ -89,6 +89,9 @@ public class XMLProperties {
         String valuePKRegex = "value_pk=\".+?(\")";
         String idBaseRegex = "idext_base=\".+?(\")";
         String idBaseDataOutRegex = "idext_data_out=\".+?(\")";
+        String idBaseIstRegex = "id_base_ist=\".+?(\")";
+        String idBasePriemRegex = "id_base_priem=\".+?(\")";
+
 
         Pattern rowPattern = Pattern.compile(rowRegex);
         Pattern namePattern = Pattern.compile(nameRegex);
@@ -99,6 +102,9 @@ public class XMLProperties {
         Pattern valuePKPattern = Pattern.compile(valuePKRegex);
         Pattern idBasePattern = Pattern.compile(idBaseRegex);
         Pattern idBaseDataOutPattern = Pattern.compile(idBaseDataOutRegex);
+        Pattern idBaseIstPattern = Pattern.compile(idBaseIstRegex);
+        Pattern idBasePriemPattern = Pattern.compile(idBasePriemRegex);
+
 
         Matcher rowMatcher = rowPattern.matcher(text);
         rowMatcher.find();
@@ -121,34 +127,58 @@ public class XMLProperties {
         int intNum = Integer.parseInt(num);
 
         Matcher operationNumMatcher = operationNumPattern.matcher(rowText);
-        operationNumMatcher.find();
-        String operationNum = operationNumMatcher.group();
-        operationNum = operationNum.substring(6, operationNum.length() - 1);
-        int intOperationNum = Integer.parseInt(operationNum);
+        int intOperationNum = 0;
+        if (operationNumMatcher.find()) {
+            String operationNum = operationNumMatcher.group();
+            operationNum = operationNum.substring(6, operationNum.length() - 1);
+            intOperationNum = Integer.parseInt(operationNum);
+        }
 
         Matcher namePKMatcher = namePKPattern.matcher(rowText);
-        namePKMatcher.find();
-        String namePK = namePKMatcher.group();
-        namePK = namePK.substring(9, namePK.length() - 1);
-
+        String namePK = null;
+        if (namePKMatcher.find()) {
+            namePK = namePKMatcher.group();
+            namePK = namePK.substring(9, namePK.length() - 1);
+        }
 
         Matcher valuePKMatcher = valuePKPattern.matcher(rowText);
-        valuePKMatcher.find();
-        String valuePK = valuePKMatcher.group();
-        valuePK = valuePK.substring(10, valuePK.length() - 1);
-        long intValuePK = Long.parseLong(valuePK);
+        long intValuePK = 0;
+        if (valuePKMatcher.find()) {
+            String valuePK = valuePKMatcher.group();
+            valuePK = valuePK.substring(10, valuePK.length() - 1);
+            Long.parseLong(valuePK);
+        }
 
         Matcher idBasePKMatcher = idBasePattern.matcher(rowText);
-        idBasePKMatcher.find();
-        String idBasePK = idBasePKMatcher.group();
-        idBasePK = idBasePK.substring(12, idBasePK.length() - 1);
-        int intIdBasePK = Integer.parseInt(idBasePK);
+        int intIdBasePK = 0;
+        if (idBasePKMatcher.find()) {
+            String idBasePK = idBasePKMatcher.group();
+            idBasePK = idBasePK.substring(12, idBasePK.length() - 1);
+            intIdBasePK = Integer.parseInt(idBasePK);
+        }
 
         Matcher idBaseDataOutPKMatcher = idBaseDataOutPattern.matcher(rowText);
         idBaseDataOutPKMatcher.find();
         String idBaseDataOutPK = idBaseDataOutPKMatcher.group();
         idBaseDataOutPK = idBaseDataOutPK.substring(16, idBaseDataOutPK.length() - 1);
         long intIdBaseDataOutPK = Long.parseLong(idBaseDataOutPK);
+
+        Matcher idBaseIstMatcher = idBaseIstPattern.matcher(rowText);
+        int idBaseIst = 0;
+        if (idBaseIstMatcher.find()){
+            String idBaseIstStr = idBaseIstMatcher.group();
+            idBaseIstStr = idBaseIstStr.substring(13, idBaseIstStr.length() - 1);
+            idBaseIst = Integer.parseInt(idBaseIstStr);
+            logger.info(idBaseIst);
+        }
+
+        Matcher idBasePriemMatcher = idBasePriemPattern.matcher(rowText);
+        int idBasePriem = 0;
+        if (idBasePriemMatcher.find()){
+            String idBasePriemStr = idBasePriemMatcher.group();
+            idBasePriemStr = idBasePriemStr.substring(15, idBasePriemStr.length() - 1);
+            idBasePriem = Integer.parseInt(idBasePriemStr);
+        }
 
 
         Map<String, String> domainMap = getDomainList(name.toLowerCase());
@@ -157,7 +187,7 @@ public class XMLProperties {
         List<FieldEntity> fieldList = getFieldList(text, domainMap);
 
 
-        return new RowEntity(name, intNum, intType, intOperationNum, namePK, intValuePK, intIdBasePK, intIdBaseDataOutPK, fieldList);
+        return new RowEntity(name.trim(), intNum, intType, intOperationNum, namePK, intValuePK, intIdBasePK, intIdBaseDataOutPK, fieldList, idBaseIst, idBasePriem);
     }
 
     public static List<RowEntity> getRowList(String fullText){

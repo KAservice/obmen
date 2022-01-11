@@ -238,7 +238,7 @@ public class UDMUribOut {
             while (tableDataOut.next()){
                 if (tableDataOut.getLong("TYPE_XDATA_OUT") == 2){
                     //выгружаем квитанцию
-                    outputKvitan(tableDataOut.getInt("IDEXT_DATAOUT_XTISM"), numberTecRecord, idTecBase, idBase);
+                    outputKvitan(tableDataOut.getLong("IDEXT_DATAOUT_XTISM"), numberTecRecord, idTecBase, idBase);
                 }
                 if (tableDataOut.getLong("TYPE_XDATA_OUT") == 1){
                     //выгружаем изменения
@@ -261,13 +261,13 @@ public class UDMUribOut {
         return result;
     }
 
-    private void outputKvitan(int idExtData, int numberTecRecord, int idTecBase, int idBase){
+    private void outputKvitan(long idExtData, long numberTecRecord, int idTecBase, int idBase){
         String result = "";
         result += "<XDATA_OUT num=\"" + numberTecRecord + "\"";
         result += " type=\"2\"";
         result += " id_base_ist=\"" + idTecBase + "\"";
         result += " id_base_priem=\"" + idBase + "\"";
-        result += "idext_data_out=\"" + idExtData + "\"> \n";
+        result += " idext_data_out=\"" + idExtData + "\"> \n";
         result += "</XDATA_OUT>";
         createXML(result);
     }

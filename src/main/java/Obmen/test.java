@@ -17,6 +17,6 @@ public class test {
     public static void main(String[] args) {
 //        ObmenExecutor.outputChanges(1);
 
-        ObmenExecutor.inputChanges("C:\\Users\\kaserv\\Desktop\\test.txt");
+        ObmenExecutor.inputChanges("/home/andrew/DB/testObmen.txt");
     }
 }

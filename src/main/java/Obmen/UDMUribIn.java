@@ -66,7 +66,7 @@ public class UDMUribIn {
                 }
             }
             else if (type == 2){
-
+                inputKvitan(row);
             }
         }
     }
@@ -188,8 +188,8 @@ public class UDMUribIn {
         String deleteQuery = "DELETE FROM " + tableName + " WHERE " + PKName + " = '" + PKValue + "'";
         String changeQuery = "update xtism set idext_base_xtism=" + idExtBaseValue +
                 ", idext_dataout_xtism=" + idExtDataOutValue +
-                "where  name_table_xtism='" + tableName + "'" +
-                "and operation_xtism=3 and xtism.value_field_id_xtism=" + PKValue;
+                " where  name_table_xtism='" + tableName + "'" +
+                " and operation_xtism=3 and xtism.value_field_id_xtism=" + PKValue;
         logger.info("изменение таблицы xtizm = {}", changeQuery);
 
         try(Connection connection = new ConnectionCreator().getPostgresConnection();
@@ -232,15 +232,15 @@ public class UDMUribIn {
             if (resultSet.next()){
                 try(Connection updateConnection = new ConnectionCreator().getPostgresConnection();
                     Statement updateStatement = updateConnection.createStatement()) {
-                    updateStatement.executeQuery(updateQuery);
+                    updateStatement.executeUpdate(updateQuery);
                 }
                 catch (SQLException ex){
-                    logger.error(ex);
+                    logger.error("ошибка в методе inputKvitan в запросе update", ex);
                 }
             }
         }
         catch (SQLException ex){
-            logger.error(ex);
+            logger.error("ошибка в методе inputKvitan", ex);
         }
     }
 

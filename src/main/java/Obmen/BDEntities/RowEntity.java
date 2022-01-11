@@ -12,8 +12,10 @@ public class RowEntity {
     private int idBase;
     private long idBaseDataOut;
     private List<FieldEntity> data;
+    private int idBaseIst;
+    private int idBasePriem;
 
-    public RowEntity(String name, int num, int type, int operationNum, String namePK, long valuePK, int idBase, long idBaseDataOut, List<FieldEntity> data) {
+    public RowEntity(String name, int num, int type, int operationNum, String namePK, long valuePK, int idBase, long idBaseDataOut, List<FieldEntity> data, int idBaseIst, int idBasePriem) {
         this.name = name;
         this.num = num;
         this.type = type;
@@ -23,6 +25,8 @@ public class RowEntity {
         this.idBase = idBase;
         this.idBaseDataOut = idBaseDataOut;
         this.data = data;
+        this.idBaseIst = idBaseIst;
+        this.idBasePriem = idBasePriem;
     }
 
     public String getName() {
@@ -95,6 +99,22 @@ public class RowEntity {
 
     public void setData(List<FieldEntity> data) {
         this.data = data;
+    }
+
+    public int getIdBaseIst() {
+        return idBaseIst;
+    }
+
+    public void setIdBaseIst(int idBaseIst) {
+        this.idBaseIst = idBaseIst;
+    }
+
+    public int getIdBasePriem() {
+        return idBasePriem;
+    }
+
+    public void setIdBasePriem(int idBasePriem) {
+        this.idBasePriem = idBasePriem;
     }
 
     @Override
