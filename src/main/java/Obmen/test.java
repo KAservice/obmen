@@ -1,6 +1,7 @@
 package Obmen;
 
 import Obmen.BDEntities.RowEntity;
+import Obmen.Util.ObmenExecutor;
 import Obmen.Util.XMLProperties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,14 +15,8 @@ public class test {
 
 
     public static void main(String[] args) {
-//        UDMUribOut udmUribOut = new UDMUribOut();
-//        udmUribOut.createDataOutTable(1);
-//        udmUribOut.createXMLDoc(1);
-//        System.out.println(udmUribOut.textXML);
+//        ObmenExecutor.outputChanges(1);
 
-        UDMUribIn udmUribIn = new UDMUribIn();
-        udmUribIn.updateDataInfBase("/home/andrew/DB/testObmen.txt");
-
-
+        ObmenExecutor.inputChanges("C:\\Users\\kaserv\\Desktop\\test.txt");
     }
 }

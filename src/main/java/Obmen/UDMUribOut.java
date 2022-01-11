@@ -20,6 +20,7 @@ public class UDMUribOut {
 
         long maxID = DBProperties.getMaxIdTableIsm(idBase);
 
+
         try(Connection connection = new ConnectionCreator().getPostgresConnection();
             Statement statement = connection.createStatement()) {
             String query = "select * from  XTISM where  ID_XTISM > " + maxID;
@@ -340,10 +341,10 @@ public class UDMUribOut {
             result += "<" + tableDataOut.getString("NAME_TABLE_XTISM") + " num=\"" + numberTecRecord + "\"";
             result += " type=\"1\"";
             result += " oper=\"" + tableDataOut.getString("OPERATION_XTISM") + "\"";
-            result += " name_pk=\"" + tableDataOut.getString("OPERATION_XTISM") + "\"";
-            result += " value_pk=\"" + tableDataOut.getString("OPERATION_XTISM") + "\"";
+            result += " name_pk=\"" + tableDataOut.getString("NAME_FIELD_ID_XTISM") + "\"";
+            result += " value_pk=\"" + tableDataOut.getString("VALUE_FIELD_ID_XTISM") + "\"";
             result += " idext_base=\"" + idTecBase + "\"";
-            result += " idext_data_out=\"" + tableDataOut.getString("OPERATION_XTISM") + "\"> \n";
+            result += " idext_data_out=\"" + tableDataOut.getString("ID_XDATA_OUT") + "\"> \n";
             result += "</" + tableDataOut.getString("NAME_TABLE_XTISM") + ">";
         }
         catch (SQLException ex){

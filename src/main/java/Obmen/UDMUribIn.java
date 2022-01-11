@@ -186,10 +186,11 @@ public class UDMUribIn {
 
         String checkQuery = "SELECT * FROM " + tableName + " WHERE " + PKName + " = '" + PKValue + "'";
         String deleteQuery = "DELETE FROM " + tableName + " WHERE " + PKName + " = '" + PKValue + "'";
-        String changeQuery = "update xtism set xtism.idext_base_xtism=" + idExtBaseValue +
-                ", xtism.idext_dataout_xtism=" + idExtDataOutValue +
-                "where  xtism.name_table_xtism='" + tableName + "'" +
-                "and xtism.operation_xtism=3 and xtism.value_field_id_xtism=" + PKValue;
+        String changeQuery = "update xtism set idext_base_xtism=" + idExtBaseValue +
+                ", idext_dataout_xtism=" + idExtDataOutValue +
+                "where  name_table_xtism='" + tableName + "'" +
+                "and operation_xtism=3 and xtism.value_field_id_xtism=" + PKValue;
+        logger.info("изменение таблицы xtizm = {}", changeQuery);
 
         try(Connection connection = new ConnectionCreator().getPostgresConnection();
             Statement statement = connection.createStatement()) {
@@ -200,14 +201,14 @@ public class UDMUribIn {
             else {
                 try(Connection deleteConnection = new ConnectionCreator().getPostgresConnection();//удаляем запись
                     Statement deleteStatement = deleteConnection.createStatement()) {
-                    deleteStatement.executeQuery(deleteQuery);
+                    deleteStatement.executeUpdate(deleteQuery);
                 }
                 catch (SQLException ex){
                     logger.error(ex);
                 }
                 try(Connection changeConnection = new ConnectionCreator().getPostgresConnection();//запись о удалении в таблицу изменений
                     Statement changeStatement = changeConnection.createStatement()) {
-                    changeStatement.executeQuery(changeQuery);
+                    changeStatement.executeUpdate(changeQuery);
                 }
                 catch (SQLException ex){
                     logger.error(ex);

@@ -27,10 +27,10 @@ public class DBProperties {
     public static boolean addRecordDataOut(long idBase, long idTableIzm, long type, long resultDB){
         boolean result = false;
         String query = "INSERT INTO XDATA_OUT (IDTISM_XDATA_OUT, IDBASE_XDATA_OUT, TYPE_XDATA_OUT, RESULT_XDATA_OUT) VALUES (" + idTableIzm + ", " + idBase + ", " + type + ", " + resultDB + ")";
-        logger.info("запрос записи в xdataout - {}", query);
+
         try(Connection connection = new ConnectionCreator().getPostgresConnection();
             Statement statement = connection.createStatement()) {
-            statement.executeQuery(query);
+            statement.executeUpdate(query);
             result = true;
         }
         catch (SQLException ex){
@@ -109,7 +109,7 @@ public class DBProperties {
 
     public static void setFirstId(int idBase, long idFirst){
         String query = "update XSETUP_OBMEN set IDFIRST_DO_XSETUP_OBMEN=" + idFirst + " where IDBASE_OBMEN_XSETUP_OBMEN=" + idBase;
-        logger.info("запрос в методе setFirstId {}", query);
+
 
         try(Connection connection = new ConnectionCreator().getPostgresConnection();
             Statement statement = connection.createStatement()) {
