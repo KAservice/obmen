@@ -258,6 +258,7 @@ public class UDMUribOut {
             logger.error("ошибка в методе createXMLDoc", ex);
         }
         createXML("</data>");
+        setOKAllKvitan(idBase);
         return result;
     }
 
@@ -510,6 +511,17 @@ public class UDMUribOut {
             logger.error(ex);
         }
         return result;
+    }
+
+    public void setOKAllKvitan(int idBase){
+        try(Connection connection = new ConnectionCreator().getPostgresConnection();
+            Statement statement = connection.createStatement()) {
+            String query = "update xdata_out set RESULT_XDATA_OUT=1 where TYPE_XDATA_OUT=2 and IDBASE_XDATA_OUT=" + idBase;
+            statement.executeUpdate(query);
+        }
+        catch (SQLException ex){
+            logger.error("Ошибка в методе setOKAllKvitan", ex);
+        }
     }
 
     public void createXML(String subtext){

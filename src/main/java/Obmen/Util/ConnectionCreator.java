@@ -8,6 +8,9 @@ import java.sql.SQLException;
 
 public class ConnectionCreator {
     private static final Logger logger =  LogManager.getLogger();
+    public static String url;
+    public static String user;
+    public static String password;
 
     public Connection getPostgresConnection(){
         Connection connection = null;
@@ -17,7 +20,7 @@ public class ConnectionCreator {
             Class.forName("org.postgresql.Driver");
 
             connection = DriverManager.getConnection(
-                    "jdbc:postgresql://localhost:5432/testObmen1","andrew", "123456");
+                    url,user, password);
         }
         catch (Exception ex){
             logger.error("ошибка при создании подключения к базе данных", ex);

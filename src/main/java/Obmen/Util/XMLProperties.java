@@ -146,7 +146,7 @@ public class XMLProperties {
         if (valuePKMatcher.find()) {
             String valuePK = valuePKMatcher.group();
             valuePK = valuePK.substring(10, valuePK.length() - 1);
-            Long.parseLong(valuePK);
+            intValuePK = Long.parseLong(valuePK);
         }
 
         Matcher idBasePKMatcher = idBasePattern.matcher(rowText);
@@ -169,7 +169,6 @@ public class XMLProperties {
             String idBaseIstStr = idBaseIstMatcher.group();
             idBaseIstStr = idBaseIstStr.substring(13, idBaseIstStr.length() - 1);
             idBaseIst = Integer.parseInt(idBaseIstStr);
-            logger.info(idBaseIst);
         }
 
         Matcher idBasePriemMatcher = idBasePriemPattern.matcher(rowText);
