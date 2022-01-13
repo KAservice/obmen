@@ -1,5 +1,5 @@
 # подключение к базе данных
-url: jdbc:postgresql://localhost:5432/testObmen2
+url: jdbc:postgresql://localhost:5432/Obmen2
 user: EXTUSER
 password: 123456
 
@@ -7,4 +7,4 @@ password: 123456
 baseID: 1
 
 # файл для обмена данных БД
-obmenURL: /home/andrew/DB/
+obmenURL: C:\Users\kaserv\Desktop

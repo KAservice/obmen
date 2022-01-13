@@ -32,15 +32,17 @@ public class ObmenExecutor {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         mapper.findAndRegisterModules();
         try {
-            configurationEntity = mapper.readValue(new File("./Configuration.yaml"), ConfigurationEntity.class);
+            File configFile = new File("./Configuration.yaml");
+            logger.info(configFile);
+            configurationEntity = mapper.readValue(configFile, ConfigurationEntity.class);
             ConnectionCreator.url = configurationEntity.url;
             ConnectionCreator.password = configurationEntity.password;
             ConnectionCreator.user = configurationEntity.user;
             obmenURL = configurationEntity.obmenURL;
             baseID = configurationEntity.baseID;
             getCurrentBaseNumber();
-            urlForOutput = obmenURL + "/dataToBase" + baseID;
-            urlForInput = obmenURL + "/dataToBase" + currentBaseID;
+            urlForOutput = obmenURL + "/DataFor" + baseID + ".kas";
+            urlForInput = obmenURL + "/DataFor" + currentBaseID + ".kas";
         }
         catch (IOException ex){
             logger.error(ex);
@@ -62,6 +64,7 @@ public class ObmenExecutor {
         if (file.exists()) {
             UDMUribIn udmUribIn = new UDMUribIn();
             udmUribIn.updateDataInfBase(urlForInput);
+            file.delete();
         }
         else
             return;
