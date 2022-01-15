@@ -12,6 +12,5 @@ public class test {
         ObmenExecutor.fillConfigData();
         ObmenExecutor.inputChanges();
         ObmenExecutor.outputChanges();
-
     }
 }

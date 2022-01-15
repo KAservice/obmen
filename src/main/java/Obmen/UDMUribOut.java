@@ -232,6 +232,7 @@ public class UDMUribOut {
         }
 
         try {
+            createXML("<?xml version=\"1.0\" encoding=\"windows-1251\"?>");
             createXML("<data>");
             ResultSet tableDataOut = DBProperties.getTableDataOut(idBase);
             int numberTecRecord = 1;

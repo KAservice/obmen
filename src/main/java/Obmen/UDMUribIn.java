@@ -153,6 +153,7 @@ public class UDMUribIn {
             int i = 1;
             for (FieldEntity field : fieldList){
                 String fieldName = field.getName();
+                String fieldDomain = field.getDomain();
                 if (!checkFieldForInsert(fieldName)){
                     continue;
                 }
@@ -161,6 +162,14 @@ public class UDMUribIn {
                 if (fieldType == 3){ //BLOB
                     byte[] decodedBlob = Base64.getDecoder().decode(fieldValue);
                     preparedStatement.setBytes(i++, decodedBlob);
+                }
+                else if (fieldDomain.equalsIgnoreCase("domain_int")){
+                    if (fieldValue.equals("")){
+                        preparedStatement.setInt(i++, 0);
+                    }
+                    else
+                        preparedStatement.setInt(i++, Integer.parseInt(fieldValue));
+
                 }
                 else {
                     preparedStatement.setString(i++, fieldValue);
@@ -251,23 +260,93 @@ public class UDMUribIn {
         String namePK = row.getNamePK();
         long valuePK = row.getValuePK();
         String docType = "";
+        String procedureName = "";
 
         if(namePK.equalsIgnoreCase("IDDOC")){
             docType = getTypeDoc(row);
-
+            procedureName = getNameProcedureCancelDvReg(docType);
         }
 
         if(namePK.equalsIgnoreCase("ID_REM_GALLDOC")){
-
+            docType = getTypeDocRemontSystem(row);
+            procedureName = getNameProcedureCancelDvRegRemontSystem(docType);
         }
 
         if(namePK.equalsIgnoreCase("ID_HOT_GALLDOC")){
-
+            docType = getTypeDocHotelSystem(row);
+            procedureName = getNameProcedureCancelDvRegHotelSystem(docType);
         }
+
+        if (procedureName.equals("")){
+            logger.error("нет процедуры для отмены проведения документа = {}", tableName);
+            try(Connection connection = new ConnectionCreator().getPostgresConnection();
+                Statement statement = connection.createStatement()) {
+                String procedureQuery = "EXECUTE GLPROC_ADD_DVREGDOC_IN_TISM (" + valuePK + ", 0,4, " + idExtBaseValue + ", " + idExtDataOutValue + ")";
+                statement.executeUpdate(procedureQuery);
+            }
+            catch (SQLException ex){
+                logger.error("ошибка при отмене проведения документа", ex);
+            }
+        }
+        else {
+
+            String procedureQuery = "EXECUTE " + procedureName + " (" + valuePK + ", 0, " + idExtBaseValue + ", " + idExtDataOutValue + ")";
+            logger.info(procedureQuery);
+            try (Connection connection = new ConnectionCreator().getPostgresConnection();
+                 Statement statement = connection.createStatement()) {
+                statement.executeUpdate(procedureQuery);
+            } catch (SQLException ex) {
+                logger.error("ошибка при отмене проведения документа", ex);
+            }
+        }
+
     }
 
     public void runCommandDvRegDoc(RowEntity row){
+        String tableName = row.getName();
+        int idExtBaseValue = row.getIdBase();
+        long idExtDataOutValue = row.getIdBaseDataOut();
+        String namePK = row.getNamePK();
+        long valuePK = row.getValuePK();
+        String docType = "";
+        String procedureName = "";
 
+        if(namePK.equalsIgnoreCase("IDDOC")){
+            docType = getTypeDoc(row);
+            procedureName = getNameProcedureDvReg(docType);
+        }
+
+        if(namePK.equalsIgnoreCase("ID_REM_GALLDOC")){
+            docType = getTypeDocRemontSystem(row);
+            procedureName = getNameProcedureDvRegRemontSystem(docType);
+        }
+
+        if(namePK.equalsIgnoreCase("ID_HOT_GALLDOC")){
+            docType = getTypeDocHotelSystem(row);
+            procedureName = getNameProcedureDvRegHotelSystem(docType);
+        }
+
+        if (procedureName.equals("")){
+            logger.error("нет процедуры для проведения документа = {}", tableName);
+            try(Connection connection = new ConnectionCreator().getPostgresConnection();
+                Statement statement = connection.createStatement()) {
+                String procedureQuery = "EXECUTE GLPROC_ADD_DVREGDOC_IN_TISM (" + valuePK + ", 0,5, " + idExtBaseValue + ", " + idExtDataOutValue + ")";
+                statement.executeUpdate(procedureQuery);
+            }
+            catch (SQLException ex){
+                logger.error("ошибка при проведении документа", ex);
+            }
+        }
+        else {
+
+            String procedureQuery = "EXECUTE " + procedureName + " (" + valuePK + ", 0, " + idExtBaseValue + ", " + idExtDataOutValue + ")";
+            try (Connection connection = new ConnectionCreator().getPostgresConnection();
+                 Statement statement = connection.createStatement()) {
+                statement.executeUpdate(procedureQuery);
+            } catch (SQLException ex) {
+                logger.error("ошибка при проведении документа", ex);
+            }
+        }
     }
 
     public String createTextZaprosInsert(RowEntity row){
@@ -312,9 +391,10 @@ public class UDMUribIn {
 
         List<FieldEntity> fieldList = row.getData();
         for (FieldEntity fieldEntity : fieldList){
+            String domainName = fieldEntity.getDomain();
             String fieldName = fieldEntity.getName();
             if (checkFieldForInsert(fieldName)){
-                fields = fields + ", " + fieldName + " = ?";
+                fields = fields + ", " + fieldName + " = ? :: " + domainName;
             }
         }
 
@@ -407,6 +487,224 @@ public class UDMUribIn {
                 logger.error(ex);
             }
         }
+        return result;
+    }
+
+    private String getNameProcedureCancelDvReg(String docType){
+        String result = "";
+
+        if (docType.equals("CHK")){result="DOC_CHK_CANCEL_DVREG";}
+        if (docType.equals("PRN")){result="DOC_PRN_CANCEL_DVREG";}//{Text="Прих. накл.";}
+        if (docType.equals("SCH")){result="DOC_SCH_CANCEL_DVREG";}//{Text="Счет на оплату";}
+        if (docType.equals("OSN")){result="DOC_OSN_CANCEL_DVREG";}//{Text="Остатки номенкл.";}
+        if (docType.equals("PER")){result="DOC_PER_CANCEL_DVREG";}//{Text="Перемещение";}
+        if (docType.equals("REA")){result="DOC_REA_CANCEL_DVREG";}//{Text="Реализация";}
+        if (docType.equals("SPN")){result="DOC_SPN_CANCEL_DVREG";}//{Text="Акт списания";}
+        if (docType.equals("VPO")){result="DOC_VPO_CANCEL_DVREG";}//{Text="Возврат поставщику";}
+        if (docType.equals("PKO")){result="DOC_PKO_CANCEL_DVREG";}//{Text="Прих. касс. ордер";}
+        if (docType.equals("RKO")){result="DOC_RKO_CANCEL_DVREG";}//{Text="Расх. касс. ордер";}
+        if (docType.equals("PLP")){result="DOC_PLP_CANCEL_DVREG";}//{Text="Платежное поручение";}
+        if (docType.equals("PNS")){result="DOC_PNS_CANCEL_DVREG";}//{Text="Поступление на счет";}
+        if (docType.equals("INV")){result="DOC_INV_CANCEL_DVREG";}//{Text="Инвентаризация";}
+        if (docType.equals("REPKKM")){result="DOC_REPKKM_CANCEL_DVREG";}//{Text="Отчет ККМ";}
+        if (docType.equals("OSTVS")){result="DOC_OSTVS_CANCEL_DVREG";}//{Text="Корр. взаиморасчетов";}
+        if (docType.equals("SCHFACT")){result="DOC_SCHFACT_CANCEL_DVREG";}//{Text="Счет-фактура";}
+        if (docType.equals("REALROZN")){result="DOC_REALROZN_CANCEL_DVREG";}//{Text="Реализация розн.";}
+        if (docType.equals("PKOROZN")){result="DOC_PKOROZN_CANCEL_DVREG";}//{Text="Приход нал.";}
+        if (docType.equals("RKOROZN")){result="DOC_RKOROZN_CANCEL_DVREG";}//{Text="Расход нал.";}
+
+        if (docType.equals("VPOK")){result="DOC_VPOK_CANCEL_DVREG";}//{Text="Возврат покупателя";}
+
+        if (docType.equals("ISMPRICE")){result="DOC_ISMPRICE_CANCEL_DVREG";}//{Text="Переоценка";}
+        if (docType.equals("SPOTROST")){result="DOC_SPOTROST_CANCEL_DVREG";}//{Text="Списание отр. остатков";}
+        if (docType.equals("REV")){result="DOC_REV_CANCEL_DVREG";}//{Text="Ревизия";}
+
+        if (docType.equals("SBKOMPL")){result="DOC_SBKOMPL_CANCEL_DVREG";}//
+        if (docType.equals("RASBKOMPL")){result="DOC_RASBKOMPL_CANCEL_DVREG";}//
+        if (docType.equals("ZAMENA")){result="DOC_ZAMENA_CANCEL_DVREG";}//
+
+        if (docType.equals("KORRVS")){result="DOC_KORRVS_CANCEL_DVREG";}
+        if (docType.equals("VIPBANK")){result="DOC_VIPBANK_CANCEL_DVREG";}
+        if (docType.equals("OTCHPOST")){result="DOC_OTCHPOST_CANCEL_DVREG";}
+
+//служебные документы
+        if (docType.equals("RG_ADVCUST")){result="DOC_RGADVCUST_CANCEL_DVREG";}
+        if (docType.equals("RG_BANK")){result="DOC_RGBANK_CANCEL_DVREG";}
+        if (docType.equals("RG_CARDBAL")){result="DOC_RGCARD_BALANCE_CANCEL_DVREG";}
+        if (docType.equals("RG_OSTNOM")){result="DOC_RGGOODS_CANCEL_DVREG";}
+        if (docType.equals("RG_KASSA")){result="DOC_RGKASSA_CANCEL_DVREG";}
+        if (docType.equals("RG_OSTNOM")){result="DOC_RGOSTNOM_CANCEL_DVREG";}
+        if (docType.equals("RG_PAYSALE")){result="DOC_RGPAYSALE_CANCEL_DVREG";}
+        if (docType.equals("RG_VSRASCH")){result="DOC_RGVSRASCH_CANCEL_DVREG";}
+        if (docType.equals("RG_OTCHPOST")){result="DOC_RGOTCHPOST_CANCEL_DVREG";}
+        return result;
+    }
+
+    private String getNameProcedureCancelDvRegRemontSystem(String docType){
+        String result = "";
+        if (docType.equals("KM1")){result="REM_DOC_KM1_CANCEL_DVREG";}
+        if (docType.equals("KM2")){result="REM_DOC_KM2_CANCEL_DVREG";}
+        if (docType.equals("REMONTHW")){result="REM_DOC_REMONTHW_CANCEL_DVREG";}
+        if (docType.equals("REMONTKKT")){result="REM_DOC_REMONTKKT_CANCEL_DVREG";}
+        if (docType.equals("REMONT")){result="REM_DOC_REMONT_CANCEL_DVREG";}
+        if (docType.equals("SETSERVHW")){result="REM_DOC_SETSERVHW_CANCEL_DVREG";}
+        if (docType.equals("SETSERVKKT")){result="REM_DOC_SETSERVKKT_CANCEL_DVREG";}
+
+
+        if (docType.equals("REMPRN")){result="REM_DOC_PRN_CANCEL_DVREG";}
+        if (docType.equals("REMREAL")){result="REM_DOC_REAL_CANCEL_DVREG";}
+        if (docType.equals("REMOSN")){result="REM_DOC_OSN_CANCEL_DVREG";}
+        if (docType.equals("REMSBKOMPL")){result="REM_DOC_SBKOMPL_CANCEL_DVREG";}
+        if (docType.equals("POSTOTDIL")){result="REM_DOC_DILPOST_CANCEL_DVREG";}
+        if (docType.equals("VOSDILERU")){result="REM_DOC_DILRET_CANCEL_DVREG";}
+        if (docType.equals("PERSC")){result="REM_DOC_SCPER_CANCEL_DVREG";}
+        if (docType.equals("VOSVISSC")){result="REM_DOC_SCRET_CANCEL_DVREG";}
+        if (docType.equals("REMVPOK")){result="REM_DOC_VPOK_CANCEL_DVREG";}
+        if (docType.equals("REMAKT")){result="REM_DOC_DAKT_CANCEL_DVREG";}
+        if (docType.equals("REMPER")){result="REM_DOC_PER_CANCEL_DVREG";}
+
+        if (docType.equals("REMZPOST")){result="REM_DOC_ZPOST_CANCEL_DVREG";}
+        if (docType.equals("REMZVID")){result="REM_DOC_ZVID_CANCEL_DVREG";}
+        if (docType.equals("REMZPER")){result="REM_DOC_ZPER_CANCEL_DVREG";}
+        if (docType.equals("REMZSTART")){result="REM_DOC_ZSTART_CANCEL_DVREG";}
+        if (docType.equals("REMZEND")){result="REM_DOC_ZEND_CANCEL_DVREG";}
+        if (docType.equals("REMZOPER")){result="REM_DOC_ZOPER_CANCEL_DVREG";}
+        if (docType.equals("REMZTREB")){result="REM_DOC_ZTREB_CANCEL_DVREG";}
+        if (docType.equals("REMZAKTPR")){result="REM_DOC_ZAKTPR_CANCEL_DVREG";}
+        if (docType.equals("REMZVZAP")){result="REM_DOC_ZVZAP_CANCEL_DVREG";}
+
+
+        if (docType.equals("REMSPN")){result="REM_DOC_SPN_CANCEL_DVREG";}
+
+        if (docType.equals("REM_RGOTCHPOST")){result="REM_DOC_RGOTCHPOST_CANCEL_DVREG";}
+
+        if (docType.equals("REM_VIDACHA_HW")){result="REM_DOC_VIDACHA_HW_CANCEL_DVREG";}
+        if (docType.equals("REM_VOSVRAT_HW")){result="REM_DOC_VOSVRAT_HW_CANCEL_DVREG";}
+
+        if (docType.equals("REM_ZAKPOST")){result="REM_DOC_ZAKPOST_CANCEL_DVREG";}
+        if (docType.equals("REM_OTPRPOST")){result="REM_DOC_OTPRPOST_CANCEL_DVREG";}
+
+
+        if (docType.equals("REM_VZPER")){result="REM_DOC_VZPER_CANCEL_DVREG";}
+        if (docType.equals("REM_VZVPO")){result="REM_DOC_VZVPO_CANCEL_DVREG";}
+        return result;
+    }
+
+    private String getNameProcedureCancelDvRegHotelSystem(String docType) {
+        String result = "";
+        if (docType.equals("BRON")){result="HOT_DOC_BRON_CANCEL_DVREG";}
+        if (docType.equals("OTMBRON")){result="HOT_DOC_OTMBRON_CANCEL_DVREG";}
+        if (docType.equals("RASCHET")){result="HOT_DOC_RASCHET_CANCEL_DVREG";}
+        if (docType.equals("RASM")){result="HOT_DOC_RASM_CANCEL_DVREG";}
+        if (docType.equals("REAL")){result="HOT_DOC_REAL_CANCEL_DVREG";}
+        if (docType.equals("VIEZD")){result="HOT_DOC_VIESD_CANCEL_DVREG";}
+        return result;
+    }
+
+    private String getNameProcedureDvReg(String docType) {
+        String result = "";
+        if (docType.equals("CHK")){result="DOC_CHK_DVREG";}
+        if (docType.equals("PRN")){result="DOC_PRN_DVREG";}//{Text="Прих. накл.";}
+        if (docType.equals("SCH")){result="DOC_SCH_DVREG";}//{Text="Счет на оплату";}
+        if (docType.equals("OSN")){result="DOC_OSN_DVREG";}//{Text="Остатки номенкл.";}
+        if (docType.equals("PER")){result="DOC_PER_DVREG";}//{Text="Перемещение";}
+        if (docType.equals("REA")){result="DOC_REA_DVREG";}//{Text="Реализация";}
+        if (docType.equals("SPN")){result="DOC_SPN_DVREG";}//{Text="Акт списания";}
+        if (docType.equals("VPO")){result="DOC_VPO_DVREG";}//{Text="Возврат поставщику";}
+        if (docType.equals("PKO")){result="DOC_PKO_DVREG";}//{Text="Прих. касс. ордер";}
+        if (docType.equals("RKO")){result="DOC_RKO_DVREG";}//{Text="Расх. касс. ордер";}
+        if (docType.equals("PLP")){result="DOC_PLP_DVREG";}//{Text="Платежное поручение";}
+        if (docType.equals("PNS")){result="DOC_PNS_DVREG";}//{Text="Поступление на счет";}
+        if (docType.equals("INV")){result="DOC_INV_DVREG";}//{Text="Инвентаризация";}
+        if (docType.equals("REPKKM")){result="DOC_REPKKM_DVREG";}//{Text="Отчет ККМ";}
+        if (docType.equals("OSTVS")){result="DOC_OSTVS_DVREG";}//{Text="Корр. взаиморасчетов";}
+        if (docType.equals("SCHFACT")){result="DOC_SCHFACT_DVREG";}//{Text="Счет-фактура";}
+        if (docType.equals("REALROZN")){result="DOC_REALROZN_DVREG";}//{Text="Реализация розн.";}
+        if (docType.equals("PKOROZN")){result="DOC_PKOROZN_DVREG";}//{Text="Приход нал.";}
+        if (docType.equals("RKOROZN")){result="DOC_RKOROZN_DVREG";}//{Text="Расход нал.";}
+
+        if (docType.equals("VPOK")){result="DOC_VPOK_DVREG";}//{Text="Возврат покупателя";}
+
+        if (docType.equals("ISMPRICE")){result="DOC_ISMPRICE_DVREG";}//{Text="Переоценка";}
+        if (docType.equals("SPOTROST")){result="DOC_SPOTROST_DVREG";}//{Text="Списание отр. остатков";}
+        if (docType.equals("REV")){result="DOC_REV_DVREG";}//{Text="Ревизия";}
+
+        if (docType.equals("SBKOMPL")){result="DOC_SBKOMPL_DVREG";}//{Text="Переоценка";}
+        if (docType.equals("RASBKOMPL")){result="DOC_RASBKOMPL_DVREG";}//{Text="Списание отр. остатков";}
+        if (docType.equals("ZAMENA")){result="DOC_ZAMENA_DVREG";}//{Text="Ревизия";}
+
+        if (docType.equals("KORRVS")){result="DOC_KORRVS_DVREG";}
+        if (docType.equals("VIPBANK")){result="DOC_VIPBANK_DVREG";}
+        if (docType.equals("OTCHPOST")){result="DOC_OTCHPOST_DVREG";}
+
+//служебные документы
+        if (docType.equals("RG_ADVCUST")){result="DOC_RGADVCUST_DVREG";}
+        if (docType.equals("RG_BANK")){result="DOC_RGBANK_DVREG";}
+        if (docType.equals("RG_CARDBAL")){result="DOC_RGCARD_BALANCE_DVREG";}
+        if (docType.equals("RG_OSTNOM")){result="DOC_RGGOODS_DVREG";}
+        if (docType.equals("RG_KASSA")){result="DOC_RGKASSA_DVREG";}
+        if (docType.equals("RG_OSTNOM")){result="DOC_RGOSTNOM_DVREG";}
+        if (docType.equals("RG_PAYSALE")){result="DOC_RGPAYSALE_DVREG";}
+        if (docType.equals("RG_VSRASCH")){result="DOC_RGVSRASCH_DVREG";}
+        if (docType.equals("RG_OTCHPOST")){result="DOC_RGOTCHPOST_DVREG";}
+        return result;
+    }
+
+    private String getNameProcedureDvRegRemontSystem(String docType) {
+        String result = "";
+        if (docType.equals("REMONT")){result="REM_DOC_REMONT_DVREG";}
+        if (docType.equals("REMONTHW")){result="REM_DOC_REMONTHW_DVREG";}
+        if (docType.equals("REMONTKKT")){result="REM_DOC_REMONTKKT_DVREG";}
+        if (docType.equals("KM1")){result="REM_DOC_KM1_DVREG";}
+        if (docType.equals("KM2")){result="REM_DOC_KM2_DVREG";}
+        if (docType.equals("SETSERVKKT")){result="REM_DOC_SETSERVKKT_DVREG";}
+        if (docType.equals("SETSERVHW")){result="REM_DOC_SETSERVHW_DVREG";}
+
+        if (docType.equals("REMPRN")){result="REM_DOC_PRN_DVREG";}
+        if (docType.equals("REMREAL")){result="REM_DOC_REAL_DVREG";}
+        if (docType.equals("REMOSN")){result="REM_DOC_OSN_DVREG";}
+        if (docType.equals("REMSBKOMPL")){result="REM_DOC_SBKOMPL_DVREG";}
+        if (docType.equals("POSTOTDIL")){result="REM_DOC_DILPOST_DVREG";}
+        if (docType.equals("VOSDILERU")){result="REM_DOC_DILRET_DVREG";}
+        if (docType.equals("PERSC")){result="REM_DOC_SCPER_DVREG";}
+        if (docType.equals("VOSVISSC")){result="REM_DOC_SCRET_DVREG";}
+        if (docType.equals("REMVPOK")){result="REM_DOC_VPOK_DVREG";}
+        if (docType.equals("REMAKT")){result="REM_DOC_DAKT_DVREG";}
+
+        if (docType.equals("REMPER")){result="REM_DOC_PER_DVREG";}
+
+        if (docType.equals("REMZPOST")){result="REM_DOC_ZPOST_DVREG";}
+        if (docType.equals("REMZVID")){result="REM_DOC_ZVID_DVREG";}
+        if (docType.equals("REMZPER")){result="REM_DOC_ZPER_DVREG";}
+        if (docType.equals("REMZSTART")){result="REM_DOC_ZSTART_DVREG";}
+        if (docType.equals("REMZEND")){result="REM_DOC_ZEND_DVREG";}
+        if (docType.equals("REMZOPER")){result="REM_DOC_ZOPER_DVREG";}
+        if (docType.equals("REMZTREB")){result="REM_DOC_ZTREB_DVREG";}
+        if (docType.equals("REMZAKTPR")){result="REM_DOC_ZAKTPR_DVREG";}
+        if (docType.equals("REMZVZAP")){result="REM_DOC_ZVZAP_DVREG";}
+
+        if (docType.equals("REMSPN")){result="REM_DOC_SPN_DVREG";}
+        if (docType.equals("REM_RGOTCHPOST")){result="REM_DOC_RGOTCHPOST_DVREG";}
+
+        if (docType.equals("REM_VIDACHA_HW")){result="REM_DOC_VIDACHA_HW_DVREG";}
+        if (docType.equals("REM_VOSVRAT_HW")){result="REM_DOC_VOSVRAT_HW_DVREG";}
+
+        if (docType.equals("REM_ZAKPOST")){result="REM_DOC_ZAKPOST_DVREG";}
+        if (docType.equals("REM_OTPRPOST")){result="REM_DOC_OTPRPOST_DVREG";}
+
+        if (docType.equals("REM_VZPER")){result="REM_DOC_VZPER_DVREG";}
+        if (docType.equals("REM_VZVPO")){result="REM_DOC_VZVPO_DVREG";}
+        return result;
+    }
+
+    private String getNameProcedureDvRegHotelSystem(String docType) {
+        String result = "";
+        if (docType.equals("BRON")){result="HOT_DOC_BRON_DVREG";}
+        if (docType.equals("OTMBRON")){result="HOT_DOC_OTMBRON_DVREG";}
+        if (docType.equals("RASCHET")){result="HOT_DOC_RASCHET_DVREG";}
+        if (docType.equals("RASM")){result="HOT_DOC_RASM_DVREG";}
+        if (docType.equals("REAL")){result="HOT_DOC_REAL_DVREG";}
+        if (docType.equals("VIEZD")){result="HOT_DOC_VIESD_DVREG";}
         return result;
     }
 }
