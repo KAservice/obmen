@@ -87,7 +87,7 @@
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>libs/</classpathPrefix>
                             <mainClass>
-                                Obmen.test
+                                Obmen.AppStarter
                             </mainClass>
                         </manifest>
                     </archive>

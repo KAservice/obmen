@@ -1,8 +1,7 @@
 package Obmen.Util;
 
+import Obmen.*;
 import Obmen.BDEntities.ConfigurationEntity;
-import Obmen.UDMUribIn;
-import Obmen.UDMUribOut;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.logging.log4j.LogManager;
@@ -32,7 +31,7 @@ public class ObmenExecutor {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         mapper.findAndRegisterModules();
         try {
-            File configFile = new File("./Configuration.yaml");
+            File configFile = new File("/opt/app/Configuration.yaml");
             logger.info(configFile);
             configurationEntity = mapper.readValue(configFile, ConfigurationEntity.class);
             ConnectionCreator.url = configurationEntity.url;
@@ -43,6 +42,13 @@ public class ObmenExecutor {
             getCurrentBaseNumber();
             urlForOutput = obmenURL + "/DataFor" + baseID + ".kas";
             urlForInput = obmenURL + "/DataFor" + currentBaseID + ".kas";
+            AppStarter.url = obmenURL;
+            AppStarter.baseID = currentBaseID;
+            AppStarter.delay = configurationEntity.delay;
+            AppStarter.period = configurationEntity.period;
+            AppStarter.outID = baseID;
+            test.url = obmenURL;
+            test.baseID = currentBaseID;
         }
         catch (IOException ex){
             logger.error(ex);

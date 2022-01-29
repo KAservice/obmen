@@ -198,14 +198,23 @@ public class UDMUribIn {
         String changeQuery = "update xtism set idext_base_xtism=" + idExtBaseValue +
                 ", idext_dataout_xtism=" + idExtDataOutValue +
                 " where  name_table_xtism='" + tableName + "'" +
-                " and operation_xtism=3 and xtism.value_field_id_xtism=" + PKValue;
-        logger.info("изменение таблицы xtizm = {}", changeQuery);
+                " and operation_xtism=3 and value_field_id_xtism=" + PKValue;
+        String deleteKvitanQuery = "insert into xtism  (operation_xtism, name_table_xtism, name_field_id_xtism," +
+                " value_field_id_xtism, idext_base_xtism, idext_dataout_xtism  ) values ( 3, '" + tableName + "', '" + PKName + "', " + PKValue +
+                ", " + idExtBaseValue + ", " + idExtDataOutValue + ")";
+        logger.info("изменение таблицы xtizm = {}", deleteKvitanQuery);
 
         try(Connection connection = new ConnectionCreator().getPostgresConnection();
             Statement statement = connection.createStatement()) {
             ResultSet resultSet = statement.executeQuery(checkQuery);
             if (!resultSet.next()){ // запись не найдена
-
+                try (Connection xtismConnection = new ConnectionCreator().getPostgresConnection();//удаляем запись
+                     Statement xtismStatement = xtismConnection.createStatement()){
+                    xtismStatement.executeUpdate(deleteKvitanQuery);
+                }
+                catch (SQLException ex){
+                    logger.error(ex);
+                }
             }
             else {
                 try(Connection deleteConnection = new ConnectionCreator().getPostgresConnection();//удаляем запись
@@ -281,20 +290,21 @@ public class UDMUribIn {
             logger.error("нет процедуры для отмены проведения документа = {}", tableName);
             try(Connection connection = new ConnectionCreator().getPostgresConnection();
                 Statement statement = connection.createStatement()) {
-                String procedureQuery = "EXECUTE GLPROC_ADD_DVREGDOC_IN_TISM (" + valuePK + ", 0,4, " + idExtBaseValue + ", " + idExtDataOutValue + ")";
-                statement.executeUpdate(procedureQuery);
+                String procedureQuery = "SELECT GLPROC_ADD_DVREGDOC_IN_TISM (" + valuePK + " :: domain_fk_key, 0 :: domain_fk_key,4 :: domain_int, " + idExtBaseValue + " :: domain_fk_key, " + idExtDataOutValue + " :: domain_fk_key)";
+                statement.execute(procedureQuery);
             }
             catch (SQLException ex){
-                logger.error("ошибка при отмене проведения документа", ex);
+                logger.error("ошибка при отмене проведения документа для которого нет своей процедуры", ex);
             }
         }
         else {
 
-            String procedureQuery = "EXECUTE " + procedureName + " (" + valuePK + ", 0, " + idExtBaseValue + ", " + idExtDataOutValue + ")";
+            String procedureQuery = "SELECT " + procedureName + " (" + valuePK + " :: domain_iddoc, 0 :: domain_bool, " + idExtBaseValue + " :: domain_fk_key," + idExtDataOutValue + " :: domain_fk_key)";
             logger.info(procedureQuery);
             try (Connection connection = new ConnectionCreator().getPostgresConnection();
                  Statement statement = connection.createStatement()) {
-                statement.executeUpdate(procedureQuery);
+                statement.execute(procedureQuery);
+                logger.info("отмена проведения документа = {} успешно завершено", tableName);
             } catch (SQLException ex) {
                 logger.error("ошибка при отмене проведения документа", ex);
             }
@@ -330,19 +340,22 @@ public class UDMUribIn {
             logger.error("нет процедуры для проведения документа = {}", tableName);
             try(Connection connection = new ConnectionCreator().getPostgresConnection();
                 Statement statement = connection.createStatement()) {
-                String procedureQuery = "EXECUTE GLPROC_ADD_DVREGDOC_IN_TISM (" + valuePK + ", 0,5, " + idExtBaseValue + ", " + idExtDataOutValue + ")";
-                statement.executeUpdate(procedureQuery);
+                String procedureQuery = "SELECT GLPROC_ADD_DVREGDOC_IN_TISM (" + valuePK + " :: domain_fk_key, 0 :: domain_fk_key,5 :: domain_int, " + idExtBaseValue + " :: domain_fk_key, " + idExtDataOutValue + " :: domain_fk_key)";
+                statement.execute(procedureQuery);
+                logger.info("проведение документа = {} успешно завершено", tableName);
             }
             catch (SQLException ex){
-                logger.error("ошибка при проведении документа", ex);
+                logger.error("ошибка при проведении документа для которого нет своей процедуры", ex);
             }
         }
         else {
 
-            String procedureQuery = "EXECUTE " + procedureName + " (" + valuePK + ", 0, " + idExtBaseValue + ", " + idExtDataOutValue + ")";
+            String procedureQuery = "SELECT " + procedureName + " (" + valuePK + " :: domain_iddoc, 0 :: domain_bool, " + idExtBaseValue + " :: domain_fk_key, " + idExtDataOutValue + " :: domain_fk_key)";
+            logger.info(procedureQuery);
             try (Connection connection = new ConnectionCreator().getPostgresConnection();
                  Statement statement = connection.createStatement()) {
-                statement.executeUpdate(procedureQuery);
+                statement.execute(procedureQuery);
+                logger.info("проведение документа = {} успешно завершено", tableName);
             } catch (SQLException ex) {
                 logger.error("ошибка при проведении документа", ex);
             }

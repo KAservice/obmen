@@ -86,71 +86,71 @@ public class UDMUribOut {
 
             ResultSet xSetupObmen = DBProperties.getXSetupObmen(idBase);
             xSetupObmen.next();
-            if(xSetupObmen.getLong("OUTZPRICE_XSETUP_OBMEN") != 1){
-                if (resultSet.getString("NAME_TABLE_XTISM").equalsIgnoreCase("SNACENKA")){
+                if (xSetupObmen.getLong("OUTZPRICE_XSETUP_OBMEN") != 1) {
+                    if (resultSet.getString("NAME_TABLE_XTISM").equalsIgnoreCase("SNACENKA")) {
+                        addDataOut = false;
+                    }
+                }
+
+                if (resultSet.getString("NAME_TABLE_XTISM").equalsIgnoreCase("LOG")) {
                     addDataOut = false;
                 }
-            }
-
-            if (resultSet.getString("NAME_TABLE_XTISM").equalsIgnoreCase("LOG")){
-                addDataOut = false;
-            }
-            if (resultSet.getString("NAME_TABLE_XTISM").equalsIgnoreCase("SETUP")){
-                addDataOut = false;
-            }
-            if (resultSet.getString("NAME_TABLE_XTISM").equalsIgnoreCase("SARM")){
-                addDataOut = false;
-            }
-            if (resultSet.getString("NAME_TABLE_XTISM").equalsIgnoreCase("SOBORUD")){
-                addDataOut = false;
-            }
-            if (resultSet.getString("NAME_TABLE_XTISM").equalsIgnoreCase("SVESNOM")){
-                addDataOut = false;
-            }
-            if (resultSet.getString("NAME_TABLE_XTISM").equalsIgnoreCase("SSCALE")){
-                addDataOut = false;
-            }
-            if (resultSet.getString("NAME_TABLE_XTISM").equalsIgnoreCase("GURNALPLAT")){
-                addDataOut = false;
-            }
+                if (resultSet.getString("NAME_TABLE_XTISM").equalsIgnoreCase("SETUP")) {
+                    addDataOut = false;
+                }
+                if (resultSet.getString("NAME_TABLE_XTISM").equalsIgnoreCase("SARM")) {
+                    addDataOut = false;
+                }
+                if (resultSet.getString("NAME_TABLE_XTISM").equalsIgnoreCase("SOBORUD")) {
+                    addDataOut = false;
+                }
+                if (resultSet.getString("NAME_TABLE_XTISM").equalsIgnoreCase("SVESNOM")) {
+                    addDataOut = false;
+                }
+                if (resultSet.getString("NAME_TABLE_XTISM").equalsIgnoreCase("SSCALE")) {
+                    addDataOut = false;
+                }
+                if (resultSet.getString("NAME_TABLE_XTISM").equalsIgnoreCase("GURNALPLAT")) {
+                    addDataOut = false;
+                }
 
 
-            if (resultSet.getString("NAME_TABLE_XTISM").equalsIgnoreCase("GALLDOC")){
-                //проверим какие поля изменены, если только PRDOC то запись не выгружаем
-                ResultSet tableIsmFields = DBProperties.getTableIsmFields(resultSet.getLong("ID_XTISM"));
-                tableIsmFields.next();
-                if(tableIsmFields.getString("FIELD_NAME_XTISM_FIELDS").equalsIgnoreCase("PRDOC")){
-                    if(!tableIsmFields.next()){
-                        addDataOut = false;
+                if (resultSet.getString("NAME_TABLE_XTISM").equalsIgnoreCase("GALLDOC")) {
+                    //проверим какие поля изменены, если только PRDOC то запись не выгружаем
+                    ResultSet tableIsmFields = DBProperties.getTableIsmFields(resultSet.getLong("ID_XTISM"));
+                    tableIsmFields.next();
+                    if (tableIsmFields.getString("FIELD_NAME_XTISM_FIELDS").equalsIgnoreCase("PRDOC")) {
+                        if (!tableIsmFields.next()) {
+                            addDataOut = false;
+                        }
                     }
                 }
-            }
 
-            if (resultSet.getString("NAME_TABLE_XTISM").equalsIgnoreCase("REM_GALLDOC")){
-                //проверим какие поля изменены, если только PRDOC то запись не выгружаем
-                ResultSet tableIsmFields = DBProperties.getTableIsmFields(resultSet.getLong("ID_XTISM"));
-                tableIsmFields.next();
-                if(tableIsmFields.getString("FIELD_NAME_XTISM_FIELDS").equalsIgnoreCase("PR_REM_GALLDOC")){
-                    if(!tableIsmFields.next()){
-                        addDataOut = false;
+                if (resultSet.getString("NAME_TABLE_XTISM").equalsIgnoreCase("REM_GALLDOC")) {
+                    //проверим какие поля изменены, если только PRDOC то запись не выгружаем
+                    ResultSet tableIsmFields = DBProperties.getTableIsmFields(resultSet.getLong("ID_XTISM"));
+                    tableIsmFields.next();
+                    if (tableIsmFields.getString("FIELD_NAME_XTISM_FIELDS").equalsIgnoreCase("PR_REM_GALLDOC")) {
+                        if (!tableIsmFields.next()) {
+                            addDataOut = false;
+                        }
                     }
                 }
-            }
 
-            if (resultSet.getString("NAME_TABLE_XTISM").equalsIgnoreCase("HOT_GALLDOC")){
-                //проверим какие поля изменены, если только PRDOC то запись не выгружаем
-                ResultSet tableIsmFields = DBProperties.getTableIsmFields(resultSet.getLong("ID_XTISM"));
-                tableIsmFields.next();
-                if(tableIsmFields.getString("FIELD_NAME_XTISM_FIELDS").equalsIgnoreCase("PR_HOT_GALLDOC")){
-                    if(!tableIsmFields.next()){
-                        addDataOut = false;
+                if (resultSet.getString("NAME_TABLE_XTISM").equalsIgnoreCase("HOT_GALLDOC")) {
+                    //проверим какие поля изменены, если только PRDOC то запись не выгружаем
+                    ResultSet tableIsmFields = DBProperties.getTableIsmFields(resultSet.getLong("ID_XTISM"));
+                    tableIsmFields.next();
+                    if (tableIsmFields.getString("FIELD_NAME_XTISM_FIELDS").equalsIgnoreCase("PR_HOT_GALLDOC")) {
+                        if (!tableIsmFields.next()) {
+                            addDataOut = false;
+                        }
                     }
                 }
-            }
 
-            if (!checkBaseRecordForObmen(xSetupObmen, resultSet, resultSet.getInt("IDBASE_XTISM"), idBase)){
-                return;
-            }
+                if (!checkBaseRecordForObmen(xSetupObmen, resultSet, resultSet.getInt("IDBASE_XTISM"), idBase)) {
+                    return;
+                }
 
             if (DBProperties.getIdElement(idBase, resultSet.getLong("ID_XTISM")) == 0 && addDataOut){
 

@@ -1,5 +1,5 @@
 # подключение к базе данных
-url: jdbc:postgresql://localhost:5432/Obmen2
+url: jdbc:postgresql://localhost:5432/kaserv
 user: EXTUSER
 password: 123456
 
@@ -7,4 +7,8 @@ password: 123456
 baseID: 1
 
 # файл для обмена данных БД
-obmenURL: C:\Users\kaserv\Desktop
+obmenURL: C:\Users\kaserv\Desktop\ObmenTests\ObmenFiles
+
+# задержка времени начала работы программы и период выполнения обмена данных в мс
+delay: 30000
+period: 30000

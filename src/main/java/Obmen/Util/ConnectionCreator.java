@@ -23,7 +23,7 @@ public class ConnectionCreator {
                     url,user, password);
         }
         catch (Exception ex){
-            logger.error("ошибка при создании подключения к базе данных", ex);
+            logger.error("ошибка при создании подключения к базе данных password", ex);
         }
 
         return connection;
